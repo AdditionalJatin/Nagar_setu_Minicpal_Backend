@@ -32,5 +32,6 @@ build/
 ### VS Code ###
 .vscode/
 
-
+##Local configuration files
 application-local.properties
+/out/application-local.properties
