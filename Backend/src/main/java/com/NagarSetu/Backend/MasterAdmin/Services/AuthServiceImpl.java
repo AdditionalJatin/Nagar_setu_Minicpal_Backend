@@ -11,8 +11,7 @@ import com.NagarSetu.Backend.MasterAdmin.DTOs.RegisterCityAdminResponseDTO;
 import com.NagarSetu.Backend.MasterAdmin.DTOs.RegisterMasterAdminRequest;
 import com.NagarSetu.Backend.MasterAdmin.DTOs.RegisterMasterAdminResponse;
 
-import com.NagarSetu.Backend.User.UserRepository;
-import com.NagarSetu.Backend.Ward.WardRepository;
+import com.NagarSetu.Backend.User.UserRepository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.NagarSetu.Backend.User;
+package com.NagarSetu.Backend.User.UserRepository;
 
 import com.NagarSetu.Backend.Entities.User;
 import com.NagarSetu.Backend.Entities.UserRole;
@@ -6,12 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 
 
-
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;

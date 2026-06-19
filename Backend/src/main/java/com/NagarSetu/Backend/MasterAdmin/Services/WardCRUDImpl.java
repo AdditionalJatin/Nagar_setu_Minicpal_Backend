@@ -216,6 +216,7 @@ public class WardCRUDImpl implements WardCRUD {
             );
         }
     }
+
     @Override
     @Transactional
     public void deleteWard(UUID wardId) {

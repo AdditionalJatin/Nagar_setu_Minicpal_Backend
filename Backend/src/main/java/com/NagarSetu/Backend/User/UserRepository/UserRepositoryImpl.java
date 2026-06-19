@@ -1,8 +1,7 @@
-package com.NagarSetu.Backend.User;
+package com.NagarSetu.Backend.User.UserRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import jakarta.persistence.Query;
 import java.util.HashMap;

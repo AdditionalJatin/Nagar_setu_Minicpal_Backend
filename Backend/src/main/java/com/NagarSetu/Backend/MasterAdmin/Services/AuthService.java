@@ -10,6 +10,7 @@ import java.util.UUID;
 
 public interface AuthService {
     RegisterMasterAdminResponse registerMasterAdmin(RegisterMasterAdminRequest userDTO);
+
     void deleteMasterAdmin(UUID userId);
 
     RegisterCityAdminResponseDTO registerCityAdmin(RegisterCityAdminRequestDTO cityAdminDTO);

@@ -1,7 +1,4 @@
-package com.NagarSetu.Backend.User;
-
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+package com.NagarSetu.Backend.User.UserRepository;
 
 import java.util.Map;
 

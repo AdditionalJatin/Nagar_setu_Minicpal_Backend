@@ -2,15 +2,13 @@ package com.NagarSetu.Backend.User.Services;
 
 
 import com.NagarSetu.Backend.City.CityRepository;
-import com.NagarSetu.Backend.Entities.User;
 import com.NagarSetu.Backend.Entities.UserRole;
 import com.NagarSetu.Backend.Entities.UserStatus;
 import com.NagarSetu.Backend.User.DTOs.RegisterRequestDTO;
 import com.NagarSetu.Backend.User.DTOs.RegisterResponseDTO;
 import com.NagarSetu.Backend.User.DTOs.UserLoginRequestDTO;
-import com.NagarSetu.Backend.User.UserRepository;
+import com.NagarSetu.Backend.User.UserRepository.UserRepository;
 import com.NagarSetu.Backend.Ward.WardRepository;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;

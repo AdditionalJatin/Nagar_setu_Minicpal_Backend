@@ -1,5 +1,9 @@
 package com.NagarSetu.Backend.Complaint;
 
+import com.NagarSetu.Backend.Entities.ComplaintStatus;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
@@ -13,5 +17,10 @@ public interface ComplaintCustom {
             String geoJson,
             UUID wardId
     );
+
+
+
+
+
 
 }

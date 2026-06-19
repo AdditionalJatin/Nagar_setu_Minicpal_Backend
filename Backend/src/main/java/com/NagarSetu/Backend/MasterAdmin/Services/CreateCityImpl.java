@@ -9,6 +9,7 @@ import com.NagarSetu.Backend.MasterAdmin.DTOs.RegisterCityDTO;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,7 +88,9 @@ public class CreateCityImpl implements CreateCity {
     }
 
 
+
     @Override
+    @Cacheable(value = "all_cities")
     public List<CityListTResponseDTO> getAllCities() {
         return cityRepository.findAllByOrderByNameAsc()
                 .stream()

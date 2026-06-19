@@ -5,14 +5,11 @@ import com.NagarSetu.Backend.City.CityRepository;
 import com.NagarSetu.Backend.CityAdmin.DTOs.CityPeopleRegisterDTO;
 import com.NagarSetu.Backend.CityAdmin.DTOs.CityPeopleRegisterResponseDTO;
 import com.NagarSetu.Backend.Entities.*;
-import com.NagarSetu.Backend.User.UserRepository;
+import com.NagarSetu.Backend.User.UserRepository.UserRepository;
 import com.NagarSetu.Backend.Ward.WardRepository;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

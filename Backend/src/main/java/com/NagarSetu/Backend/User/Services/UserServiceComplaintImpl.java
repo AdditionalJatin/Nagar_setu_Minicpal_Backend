@@ -6,7 +6,7 @@ import com.NagarSetu.Backend.Complaint.ComplaintRepository;
 import com.NagarSetu.Backend.Entities.*;
 import com.NagarSetu.Backend.User.DTOs.ComplaintResponseDTO;
 import com.NagarSetu.Backend.User.DTOs.CreateComplaintDTO;
-import com.NagarSetu.Backend.User.UserRepository;
+import com.NagarSetu.Backend.User.UserRepository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;

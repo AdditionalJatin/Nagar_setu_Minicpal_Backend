@@ -13,7 +13,6 @@ public enum Department {
             24, // SLA in hours
             Priority.LOW
     ),
-
     WATER_SUPPLY(
             "Water Supply",
             "Water leakage, supply issues",
