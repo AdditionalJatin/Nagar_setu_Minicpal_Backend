@@ -1,9 +1,9 @@
 package com.NagarSetu.Backend.User.Controllers;
 
 
-import com.NagarSetu.Backend.Complaint.ComplaintRepository;
 import com.NagarSetu.Backend.User.DTOs.ComplaintResponseDTO;
 import com.NagarSetu.Backend.User.DTOs.CreateComplaintDTO;
+import com.NagarSetu.Backend.User.DTOs.UpdateComplaintDTO;
 import com.NagarSetu.Backend.User.Services.UserServiceComplaint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
-public class RegisterComplaint {
+public class ComplaintController {
 
     private final UserServiceComplaint userServiceComplaint;
 
-    @PostMapping("/complaint")
+    @PostMapping("/registerComplaint")
     public ResponseEntity<ComplaintResponseDTO> registerComplaint(@RequestBody CreateComplaintDTO dto) {
         ComplaintResponseDTO response = userServiceComplaint.registerComplaint(dto);
         return ResponseEntity
@@ -28,6 +28,17 @@ public class RegisterComplaint {
                 .body(response);
 
     }
+
+    @PostMapping("/updateComplaint")
+    public ResponseEntity<ComplaintResponseDTO> updateComplaint(@RequestBody UpdateComplaintDTO dto){
+
+        ComplaintResponseDTO response = userServiceComplaint.updateComplaint(dto);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+
 
 
 }

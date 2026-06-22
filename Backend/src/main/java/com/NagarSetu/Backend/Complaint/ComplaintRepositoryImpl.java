@@ -28,7 +28,8 @@ public class ComplaintRepositoryImpl implements ComplaintCustom {
             String priority,
             UUID userId,
             String geoJson,
-            UUID wardId
+            UUID wardId,
+            String remarkedByRole
     ) {
 
         String sql = """
@@ -64,8 +65,10 @@ public class ComplaintRepositoryImpl implements ComplaintCustom {
         photo_count,
         created_at,
         updated_at,
+        resolved_at,
+        escalated_at,
         last_remark,
-        remarked_by
+        remarked_by_role
     )
     SELECT
         gen_random_uuid(),
@@ -82,8 +85,10 @@ public class ComplaintRepositoryImpl implements ComplaintCustom {
         0,
         NOW(),
         NOW(),
+        NULL,
+        NULL,
         'Complaint registered',
-        'CITIZEN'
+        :remarkedByRole
     
     FROM complaint_point cp
     JOIN validation v ON true
@@ -102,6 +107,7 @@ public class ComplaintRepositoryImpl implements ComplaintCustom {
         query.setParameter("userId", userId);
         query.setParameter("geoJson", geoJson);
         query.setParameter("wardId", wardId);
+        query.setParameter("remarkedByRole", remarkedByRole);
 
         Object resultObj = query.getResultStream().findFirst().orElse(null);
 

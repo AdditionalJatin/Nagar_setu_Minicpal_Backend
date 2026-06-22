@@ -90,7 +90,6 @@ public class CreateCityImpl implements CreateCity {
 
 
     @Override
-    @Cacheable(value = "all_cities")
     public List<CityListTResponseDTO> getAllCities() {
         return cityRepository.findAllByOrderByNameAsc()
                 .stream()

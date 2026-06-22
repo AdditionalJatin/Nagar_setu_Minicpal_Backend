@@ -2,6 +2,7 @@ package com.NagarSetu.Backend.Entities.WardMetricesDashboard;
 
 
 
+import com.NagarSetu.Backend.Entities.Department;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -161,4 +162,51 @@ public class WardAnalytics {
     public void preUpdate() {
         this.lastUpdatedAt = LocalDateTime.now();
     }
+
+
+    public void incrementDepartment(Department department) {
+
+        switch (department) {
+
+            case SANITATION -> sanitationComplaints++;
+
+            case WATER_SUPPLY -> waterSupplyComplaints++;
+
+            case ELECTRICITY -> electricityComplaints++;
+
+            case ROADS -> roadsComplaints++;
+
+            case DRAINAGE -> drainageComplaints++;
+
+            case PUBLIC_HEALTH -> publicHealthComplaints++;
+
+            default -> otherComplaints++;
+        }
+    }
+
+    public void decrementDepartment(Department department) {
+
+        switch (department) {
+
+            case SANITATION -> sanitationComplaints--;
+
+            case WATER_SUPPLY -> waterSupplyComplaints--;
+
+            case ELECTRICITY -> electricityComplaints--;
+
+            case ROADS -> roadsComplaints--;
+
+            case DRAINAGE -> drainageComplaints--;
+
+            case PUBLIC_HEALTH -> publicHealthComplaints--;
+
+            default -> otherComplaints--;
+        }
+    }
+
+
+
+
+
 }
+

@@ -15,7 +15,8 @@ public interface ComplaintCustom {
             String priority,
             UUID userId,
             String geoJson,
-            UUID wardId
+            UUID wardId,
+            String remarkedByRole
     );
 
 

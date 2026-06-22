@@ -54,13 +54,18 @@ public class Complaint {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserRole remarkedBy;
+    private UserRole remarkedByRole;
+
 
     private LocalDateTime lastUpdatedAt;
     private Integer photoCount;
 
     private LocalDateTime createdAt;
     private  LocalDateTime updatedAt;
+
+    private LocalDateTime resolvedAt;
+
+    private LocalDateTime escalatedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
