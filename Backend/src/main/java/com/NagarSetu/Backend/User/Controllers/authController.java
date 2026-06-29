@@ -1,10 +1,9 @@
 package com.NagarSetu.Backend.User.Controllers;
 
 
-import com.NagarSetu.Backend.User.DTOs.RegisterRequestDTO;
-import com.NagarSetu.Backend.User.DTOs.RegisterResponseDTO;
-import com.NagarSetu.Backend.User.DTOs.UserLoginRequestDTO;
+import com.NagarSetu.Backend.User.DTOs.*;
 import com.NagarSetu.Backend.User.Services.AUTH;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,9 +28,23 @@ public class authController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<RegisterResponseDTO> login(@RequestBody UserLoginRequestDTO request) {
-        return ResponseEntity.ok(auth.login(request));
+    public ResponseEntity<UserLoginResponseDTO> login(@RequestBody UserLoginRequestDTO request, HttpServletResponse res) {
+        UserLoginResponseDTO response = auth.login(request,res);
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED)
+                .body(response);
     }
 
+
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshResponse> refresh(@RequestBody RefreshRequest request) {
+        return ResponseEntity.ok(auth.refresh(request));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestBody LogoutRequestDTO request) {
+        auth.logout(request);
+        return ResponseEntity.ok("Successfully logged out.");
+    }
 
 }

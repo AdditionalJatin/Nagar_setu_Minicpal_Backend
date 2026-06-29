@@ -2,19 +2,32 @@ package com.NagarSetu.Backend.User.Services;
 
 
 import com.NagarSetu.Backend.City.CityRepository;
+import com.NagarSetu.Backend.CompleteSecurity.JwtService;
+import com.NagarSetu.Backend.CompleteSecurity.RefreshTokenRepository;
+import com.NagarSetu.Backend.CompleteSecurity.Security.AuthUtil;
+import com.NagarSetu.Backend.CompleteSecurity.Security.CookieService;
+import com.NagarSetu.Backend.Entities.RefreshToken;
+import com.NagarSetu.Backend.Entities.User;
 import com.NagarSetu.Backend.Entities.UserRole;
 import com.NagarSetu.Backend.Entities.UserStatus;
-import com.NagarSetu.Backend.User.DTOs.RegisterRequestDTO;
-import com.NagarSetu.Backend.User.DTOs.RegisterResponseDTO;
-import com.NagarSetu.Backend.User.DTOs.UserLoginRequestDTO;
+import com.NagarSetu.Backend.User.DTOs.*;
 import com.NagarSetu.Backend.User.UserRepository.UserRepository;
 import com.NagarSetu.Backend.Ward.WardRepository;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.NagarSetu.Backend.Entities.RefreshToken;
 
+import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,10 +38,16 @@ public class AUTHImpl implements AUTH {
     private final UserRepository userRepository;
     private final CityRepository cityRepository;
     private final ObjectMapper mapper;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+    private final AuthUtil authUtil;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final CookieService cookieService;
 
 
     @Override
-    public RegisterResponseDTO login(UserLoginRequestDTO request) {
+    public UserLoginResponseDTO login(UserLoginRequestDTO request, HttpServletResponse response) {
 
         if(request.getPhone() == null || request.getPhone().isBlank()) {
             throw new IllegalArgumentException("Phone number is required");
@@ -37,57 +56,100 @@ public class AUTHImpl implements AUTH {
             throw new IllegalArgumentException("Password is required");
         }
 
-        Map<String, Object> user = userRepository.findUserForLogin(request.getPhone());
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getPhone(),
+                        request.getPassword()
+                )
+        );
 
-        if (user == null || user.isEmpty()) {
-            throw new RuntimeException("User not found");
+        User user = (User) authentication.getPrincipal();
+
+        if (user.getStatus() == UserStatus.BLOCKED) {
+            throw new RuntimeException("Your account has been blocked.");
         }
 
-        // 🚫 Check status
-        String statusStr = user.get("status").toString();
-        if ("BLOCKED".equalsIgnoreCase(statusStr)) {
-            throw new RuntimeException("User is Blocked");
-        }
+        String jti = UUID.randomUUID().toString();
+        String accessToken = authUtil.generateAccessToken(user);
 
-        String dbPassword = user.get("password").toString();
-        if (!dbPassword.equals(request.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
-        }
-
-        Map<String, Object> locationMap = null;
-
-        if (user.get("location") != null) {
-            try {
-                locationMap = mapper.readValue(
-                        user.get("location").toString(),
-                        Map.class
-                );
-            } catch (Exception e) {
-                System.out.println("Invalid GeoJSON: " + user.get("location"));
-                locationMap = null; // avoid crash
-            }
-        }
+        String refreshToken = authUtil.generateRefreshToken(user,jti);
 
 
-        return RegisterResponseDTO.builder()
-                .id(UUID.fromString(user.get("id").toString()))
-                .phone((String) user.get("phone"))
-                .name((String) user.get("name"))
-                .email((String) user.get("email"))
-                .status(UserStatus.valueOf(statusStr.toUpperCase()))
-                .role(UserRole.valueOf(user.get("role").toString()))
-                .wardId(user.get("ward_id") != null
-                        ? UUID.fromString(user.get("ward_id").toString())
-                        : null)
-                .cityId(user.get("city_id") != null
-                        ? UUID.fromString(user.get("city_id").toString())
-                        : null)
-                .location(locationMap) // ✅ GeoJSON
+        RefreshToken Refresh_Token = jwtService.createRefreshToken(user,jti);
+
+
+//        List<RefreshToken> tokens = refreshTokenRepository.findAllByUser(user);
+//
+//        tokens.forEach(token -> token.setRevoked(true));
+//
+//        refreshTokenRepository.saveAll(tokens);
+
+
+
+        cookieService.attachRefreshTokenToCookie(response,refreshToken,(int)authUtil.getRefreshTokenValidityInMillis());
+        cookieService.addNoStoreHeader(response);
+
+        return UserLoginResponseDTO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(authUtil.getAccessTokenValidityInMillis())
+                .id(user.getId())
                 .build();
 
     }
 
 
+
+
+    @Override
+    public RefreshResponse refresh(RefreshRequest refreshRequest) {
+
+        String refreshToken = refreshRequest.getRefreshToken();
+
+        if(refreshToken == null || refreshToken.isBlank()) {
+            throw new IllegalArgumentException("Refresh token is required");
+        }
+
+        if(!authUtil.isRefreshToken(refreshToken)) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+
+        String jti = authUtil.getJti(refreshToken);
+        UUID userId = authUtil.getUserId(refreshToken);
+
+        RefreshToken storedToken = refreshTokenRepository.findByJti(jti)
+                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+
+        if(storedToken.getExpiresAt().isBefore(Instant.now())) {
+            refreshTokenRepository.delete(storedToken);
+            throw new RuntimeException("Refresh token has expired");
+        }
+        if(storedToken.isRevoked()) {
+            jwtService.revokeAllUserTokens(storedToken.getUser());
+            throw new RuntimeException("Refresh token has been revoked");
+        }
+
+        if(!storedToken.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+
+        String jtii = UUID.randomUUID().toString();
+        User user = storedToken.getUser();
+        String newAccessToken = authUtil.generateAccessToken(user);
+        String newRefreshToken = authUtil.generateRefreshToken(user,jtii);
+
+        RefreshToken newrefreshToken = jwtService.rotateRefreshToken(storedToken,jtii);
+
+
+
+
+        return RefreshResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .expiresIn(authUtil.getAccessTokenValidityInMillis())
+                .build();
+
+    }
 
 
 
@@ -122,7 +184,7 @@ public class AUTHImpl implements AUTH {
 
             Map<String, Object> result = userRepository.registerUser(
                     request.getPhone(),
-                    request.getPassword(),
+                    passwordEncoder.encode(request.getPassword()),
                     request.getName(),
                     email,
                     geoJson
@@ -151,6 +213,34 @@ public class AUTHImpl implements AUTH {
         }
 
     }
+
+
+    @Override
+    public void logout(LogoutRequestDTO request) {
+String refreshToken = request.getRefreshToken();
+
+        if(refreshToken == null || refreshToken.isBlank()) {
+            throw new IllegalArgumentException("Refresh token is required");
+        }
+
+        if(!authUtil.isRefreshToken(refreshToken)) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+
+        String jti = authUtil.getJti(refreshToken);
+        UUID userId = authUtil.getUserId(refreshToken);
+
+        RefreshToken storedToken = refreshTokenRepository.findByJti(jti)
+                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+
+        if(!storedToken.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+
+        jwtService.revokeAllUserTokens(storedToken.getUser());
+
+    }
+
 
     private Map<String, Object> parsePoint(String wkt) {
         if (wkt == null) return null;
